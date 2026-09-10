@@ -2,7 +2,7 @@ const https = require('https');
 
 const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK;
 const RSC_API_KEY = process.env.RSC_API_KEY;
-const MESSAGE_ID = '1547697657399615569';
+const MESSAGE_ID = '1547701512522956892';
 
 const TARGET_URL = 'https://api.rscripts.net/v1/analytics/ingame?period=30d';
 
