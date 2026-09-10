@@ -1,23 +1,45 @@
-name: Decode Hub Stats Loop
+name: Decode Hub Stats
+
+permissions:
+  contents: write
+  actions: write
 
 on:
   workflow_dispatch:
 
 jobs:
-  send-stats:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - name: Loop update every 3 minutes
+          node-version: 20
+
+      - name: Run bot (4 hours 50 minutes before restart)
         run: |
-          while true; do
-            echo "=== Update at $(date) ==="
-            node script.js || echo "Script failed, retrying..."
-            echo "Waiting 3 minutes..."
-            sleep 180
-          done
+          echo "Running loop for 4 hours 50 minutes..."
+          timeout 17400s bash -c '
+            while true; do
+              echo "=== Update at $(date) ==="
+              node script.js || echo "Script failed, retrying..."
+              echo "Waiting 3 minutes..."
+              sleep 180
+            done
+          ' || true
+          echo "Loop stopped after 4h 50m."
+
+      - name: Wait before restart
+        run: |
+          echo "Waiting 60 seconds before restart..."
+          sleep 60
+
+      - name: Restart workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Restarting workflow..."
+          gh workflow run "${{ github.workflow }}" --ref "${{ github.ref }}"
