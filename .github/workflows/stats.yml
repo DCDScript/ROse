@@ -1,19 +1,23 @@
-name: Decode Hub Stats
+name: Decode Hub Stats Loop
 
 on:
-  schedule:
-    - cron: '* * * * *'
   workflow_dispatch:
 
 jobs:
   send-stats:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Run script
-        run: node script.js
+      - name: Loop update every 3 minutes
+        run: |
+          while true; do
+            echo "=== Update at $(date) ==="
+            node script.js || echo "Script failed, retrying..."
+            echo "Waiting 3 minutes..."
+            sleep 180
+          done
