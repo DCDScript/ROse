@@ -2,12 +2,13 @@ name: Decode Hub Stats
 
 on:
   schedule:
-    - cron: '* * * * *'  # Every 1 minute
+    - cron: '* * * * *'
   workflow_dispatch:
 
 jobs:
   send-stats:
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node
