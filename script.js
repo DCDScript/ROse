@@ -3,6 +3,7 @@ const https = require('https');
 // REPLACE WITH YOUR REAL VALUES
 const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1547685091298254929/oS3WqejHn6OL7gBK6ar01Xts4tsgmWpvReXDew_592AuPUJfaJHeVxqGPKUluoWyt_VF';
 const RSC_API_KEY = 'rsc_live_MPDb5TC8atDu_Zh2hBi4HFKZz9XSprXE';
+const MESSAGE_ID = '1547685839671136256';
 
 const TARGET_URL = 'https://api.rscripts.net/v1/analytics/ingame?period=30d';
 
@@ -37,15 +38,16 @@ function fetchData() {
   });
 }
 
-function sendDiscord(text) {
+function updateDiscord(text) {
   return new Promise((resolve, reject) => {
-    const url = new URL(DISCORD_WEBHOOK);
-    const payload = JSON.stringify({ content: text });
+    const webhookUrl = new URL(DISCORD_WEBHOOK);
+    const patchPath = webhookUrl.pathname.replace(/\/$/, '') + '/messages/' + MESSAGE_ID;
 
+    const payload = JSON.stringify({ content: text });
     const options = {
-      hostname: url.hostname,
-      path: url.pathname + url.search,
-      method: 'POST',
+      hostname: webhookUrl.hostname,
+      path: patchPath,
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(payload),
@@ -69,7 +71,6 @@ async function main() {
   try {
     const response = await fetchData();
 
-    // Extract from new API format: data.totals.*
     const totals = response?.data?.totals ?? {};
     let stats = {
       runs: totals.runs ?? 0,
@@ -78,27 +79,17 @@ async function main() {
       liveNow: totals.liveNow ?? 0,
     };
 
-    const now = new Date();
-    const timeString = now.toLocaleString('en-US', {
-      month: 'short', day: 'numeric', year: 'numeric',
-      hour: '2-digit', minute: '2-digit', second: '2-digit',
-      timeZoneName: 'short'
-    });
+    const unixTime = Math.floor(Date.now() / 1000);
 
-    // Design without emojis - using box characters
-    const message = `╔════════════════════════════════════════╗
-║         DECODE HUB SCRIPT TRACKER        ║
-╠════════════════════════════════════════╣
-║  TOTAL EXECUTIONS : ${String(stats.runs).padEnd(14)} ║
-║  UNIQUE USERS     : ${String(stats.uniquePlayers).padEnd(14)} ║
-║  AVG SESSION      : ${String(stats.avgSessionMinutes + ' mins').padEnd(14)} ║
-║  LIVE USERS       : ${String(stats.liveNow).padEnd(14)} ║
-╠════════════════════════════════════════╣
-║  UPDATED          : now (${timeString}) ║
-╚════════════════════════════════════════╝`;
+    // Bullet design, no emojis, Discord auto-timezone timestamp
+    const message = `• Total Executions: ${stats.runs}
+• Unique Users: ${stats.uniquePlayers}
+• Average Session: ${stats.avgSessionMinutes} mins
+• Live Users: ${stats.liveNow}
+Updated: <t:${unixTime}:R>`;
 
-    console.log('Sending to Discord:', message);
-    const result = await sendDiscord(message);
+    console.log('Updating Discord message:', MESSAGE_ID);
+    const result = await updateDiscord(message);
     console.log('Discord response:', result.status, result.body);
   } catch (err) {
     console.error('Error:', err.message);
@@ -107,4 +98,3 @@ async function main() {
 }
 
 main();
-
