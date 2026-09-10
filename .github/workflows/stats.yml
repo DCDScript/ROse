@@ -20,6 +20,9 @@ jobs:
           node-version: 20
 
       - name: Run bot (4 hours 50 minutes before restart)
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          RSC_API_KEY: ${{ secrets.RSC_API_KEY }}
         run: |
           echo "Running loop for 4 hours 50 minutes..."
           timeout 17400s bash -c '
