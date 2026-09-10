@@ -1,8 +1,7 @@
 const https = require('https');
 
-// REPLACE WITH YOUR REAL VALUES
-const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1547685091298254929/oS3WqejHn6OL7gBK6ar01Xts4tsgmWpvReXDew_592AuPUJfaJHeVxqGPKUluoWyt_VF';
-const RSC_API_KEY = 'rsc_live_MPDb5TC8atDu_Zh2hBi4HFKZz9XSprXE';
+const DISCORD_WEBHOOK = process.env.DISCORD_WEBHOOK;
+const RSC_API_KEY = process.env.RSC_API_KEY;
 const MESSAGE_ID = '1547685839671136256';
 
 const TARGET_URL = 'https://api.rscripts.net/v1/analytics/ingame?period=30d';
