@@ -37,19 +37,19 @@ function fetchData() {
   });
 }
 
-function updateDiscord(text) {
+function updateDiscord(payload) {
   return new Promise((resolve, reject) => {
     const webhookUrl = new URL(DISCORD_WEBHOOK);
     const patchPath = webhookUrl.pathname.replace(/\/$/, '') + '/messages/' + MESSAGE_ID;
 
-    const payload = JSON.stringify({ content: text });
+    const body = typeof payload === 'string' ? JSON.stringify({ content: payload }) : JSON.stringify(payload);
     const options = {
       hostname: webhookUrl.hostname,
       path: patchPath,
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(payload),
+        'Content-Length': Buffer.byteLength(body),
         'User-Agent': 'DecodeHubScript/1.0',
       }
     };
@@ -61,7 +61,7 @@ function updateDiscord(text) {
     });
 
     req.on('error', reject);
-    req.write(payload);
+    req.write(body);
     req.end();
   });
 }
@@ -79,16 +79,24 @@ async function main() {
     };
 
     const unixTime = Math.floor(Date.now() / 1000);
-
-    // Bullet design, no emojis, Discord auto-timezone timestamp
-    const message = `• Total Executions: ${stats.runs}
-• Unique Users: ${stats.uniquePlayers}
-• Average Session: ${stats.avgSessionMinutes} mins
-• Live Users: ${stats.liveNow}
-Updated: <t:${unixTime}:R>`;
+    const embedPayload = {
+      embeds: [
+        {
+          title: "Script Stats",
+          color: 0x5865f2,
+          fields: [
+            { name: "Total Executions", value: String(stats.runs), inline: true },
+            { name: "Unique Users", value: String(stats.uniquePlayers), inline: true },
+            { name: "Average Session", value: `${stats.avgSessionMinutes} mins`, inline: true },
+            { name: "Live Users", value: String(stats.liveNow), inline: true },
+          ],
+          footer: { text: `Updated: <t:${unixTime}:R>` },
+        },
+      ],
+    };
 
     console.log('Updating Discord message:', MESSAGE_ID);
-    const result = await updateDiscord(message);
+    const result = await updateDiscord(embedPayload);
     console.log('Discord response:', result.status, result.body);
   } catch (err) {
     console.error('Error:', err.message);
