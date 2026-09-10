@@ -2,7 +2,7 @@ name: Decode Hub Stats
 
 on:
   schedule:
-    - cron: '* * * * *'
+    - cron: '* * * * *'  # Every 1 minute
   workflow_dispatch:
 
 jobs:
