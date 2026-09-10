@@ -80,6 +80,7 @@ async function main() {
 
     const unixTime = Math.floor(Date.now() / 1000);
     const embedPayload = {
+      content: `Updated: <t:${unixTime}:R>`,
       embeds: [
         {
           title: "Script Stats",
@@ -90,7 +91,6 @@ async function main() {
             { name: "Average Session", value: `${stats.avgSessionMinutes} mins`, inline: true },
             { name: "Live Users", value: String(stats.liveNow), inline: true },
           ],
-          footer: { text: `Updated: <t:${unixTime}:R>` },
         },
       ],
     };
